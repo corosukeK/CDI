@@ -24,9 +24,17 @@
 #import "CDI.h"
 #import "Sample6Service.h"
 #import "Sample6ServiceImplementation2.h"
+#import "Sample_UserDefaultsService.h"
 
+@interface AppDelegate ()
+
+@property (nonatomic) Sample_UserDefaultsService *service;
+
+@end
 
 @implementation AppDelegate
+
+@inject(service)
 
 /**
 * Initialize CDI to enable context and dependency injection
@@ -36,6 +44,19 @@
   // Enable context and dependency injection
   [CDI initialize];
   [[CDIInjector sharedInstance] bindProtocol:@protocol(Sample6Service) with:[Sample6ServiceImplementation2 class]];
+}
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application
+{
+    if(self.service == nil){
+        NSLog(@"さーびすがないー");
+    }
+    else if(self.service.sampleString == nil){
+        NSLog(@"サンプルなかったー");
+        self.service.sampleString = @"ほむほむ";
+    }else{
+        NSLog(@"サンプルあったよー %@",self.service.sampleString);
+    }
 }
 
 @end

@@ -119,6 +119,48 @@ static NSMutableArray *interceptorClassFilter = nil;
     return reference;
 }
 
++ (id)performInstanceInitializationWithUserDefaultsInjectors:(id)reference {
+    unsigned int methodIndex = 0;
+    
+    Method *methods = class_copyMethodList([reference class], &methodIndex);
+    
+    if (methods) {
+        while (methodIndex--) {
+            
+            NSString *methodName = [NSString stringWithUTF8String:sel_getName(method_getName((methods[methodIndex])))];
+            // Check for instance method injection
+            // -------------------------------------
+            if ([methodName hasPrefix:__USER_DEFAULTS_INJECT_INSTANCE_PREFIX]) {
+                // Remove the prefix and use it as the instance variable
+                NSString *instanceVariableName = [methodName substringFromIndex:[__USER_DEFAULTS_INJECT_INSTANCE_PREFIX length]];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                NSString *userDefaultsKey = [reference performSelector:NSSelectorFromString(methodName)];
+#pragma clang diagnostic pop
+                
+                if ([instanceVariableName hasPrefix:__USER_DEFAULTS_INJECT_TYPE_PREFIX]) {
+                    // In this case there is no assignment for a class which should be
+                    // instantiated.
+                    instanceVariableName = [instanceVariableName substringFromIndex:[__USER_DEFAULTS_INJECT_TYPE_PREFIX length]];
+                    [CDIUserDefaultsInjector createAccessor:instanceVariableName inObject:reference withKey:userDefaultsKey];
+                } else {
+                    // Extract the type and instance variable name
+                    NSUInteger prefixLocation = [instanceVariableName rangeOfString:__USER_DEFAULTS_INJECT_TYPE_PREFIX].location;
+                    NSString *type = [instanceVariableName substringToIndex:prefixLocation];
+                    instanceVariableName = [instanceVariableName substringFromIndex:[__USER_DEFAULTS_INJECT_TYPE_PREFIX length] + prefixLocation];
+                    // A class was defined as the type for the variable instantiation.
+                    [CDIUserDefaultsInjector createAccessor:instanceVariableName inObject:reference ofType:type withKey:userDefaultsKey];
+                }
+                
+            }
+        }
+        free((void *) methods);
+    }
+    
+    return reference;
+
+}
+
 /**
 * The new init method for NSObject.
 *
@@ -126,6 +168,7 @@ static NSMutableArray *interceptorClassFilter = nil;
 */
 - (id)initCDI {
     self = [CDI performInstanceInitializationWithInjectors:self];
+    self = [CDI performInstanceInitializationWithUserDefaultsInjectors:self];
     self = [self initCDI];
     self = [CDI performInstanceInitializationWithInterceptors:self];
     return self;

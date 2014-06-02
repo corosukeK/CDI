@@ -1,14 +1,14 @@
 PODS:
-  - CDI (1.0.0-beta2)
+  - CDI (1.0.0)
 
 DEPENDENCIES:
-  - CDI (from `../`)
+  - CDI (from `../CDI.podspec`)
 
 EXTERNAL SOURCES:
   CDI:
-    :path: ../
+    :path: ../CDI.podspec
 
 SPEC CHECKSUMS:
-  CDI: 82494afc50563dd3df0a8e204f98a05529fb3f7f
+  CDI: 354f9eb1ee7bdeb5b797aafa5c27f7565a252915
 
-COCOAPODS: 0.29.0
+COCOAPODS: 0.33.1

@@ -1,4 +1,4 @@
-pod "CDI", :path => "../"
+pod "CDI", :path => "../CDI.podspec"
 xcodeproj 'Sample/Sample.xcodeproj'
 workspace 'CDI.xcworkspace'
 platform :ios, "7.0"
