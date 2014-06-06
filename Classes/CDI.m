@@ -161,6 +161,35 @@ static NSMutableArray *interceptorClassFilter = nil;
 
 }
 
++ (id)performInstanceInitializationWithNotificationInjectors:(id)reference {
+    unsigned int methodIndex = 0;
+    
+    Method *methods = class_copyMethodList([reference class], &methodIndex);
+    
+    if (methods) {
+        while (methodIndex--) {
+            
+            NSString *methodName = [NSString stringWithUTF8String:sel_getName(method_getName((methods[methodIndex])))];
+            // Check for instance method injection
+            // -------------------------------------
+            if ([methodName hasPrefix:__NOTIFICATION_INJECT_PREFIX]) {
+                // Remove the prefix and use it as the instance variable
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                CDINotificationInjectorObject *object = [reference performSelector:NSSelectorFromString(methodName)];
+#pragma clang diagnostic pop
+                
+                [CDINotificationInjector addObserver:reference selectorName:object.selectorName name:object.notificationName];
+                
+            }
+        }
+        free((void *) methods);
+    }
+    
+    return reference;
+    
+}
+
 /**
 * The new init method for NSObject.
 *
@@ -169,6 +198,7 @@ static NSMutableArray *interceptorClassFilter = nil;
 - (id)initCDI {
     self = [CDI performInstanceInitializationWithInjectors:self];
     self = [CDI performInstanceInitializationWithUserDefaultsInjectors:self];
+    self = [CDI performInstanceInitializationWithNotificationInjectors:self];
     self = [self initCDI];
     self = [CDI performInstanceInitializationWithInterceptors:self];
     return self;

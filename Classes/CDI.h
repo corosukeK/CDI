@@ -25,6 +25,7 @@
 #import "CDIInterceptor.h"
 #import "CDIInjector.h"
 #import "CDIUserDefaultsInjector.h"
+#import "CDINotificationInjector.h"
 
 /**
 * CDI is the main class of the context and dependency injection implementation. CDI has to be initialized properly and
