@@ -22,6 +22,12 @@ return object; \
 }\
 @end\
 
+#define SendNotification(n,obj) autoreleasepool{\
+NSNotification *notification = [NSNotification notificationWithName:n object:obj];\
+[[NSNotificationCenter defaultCenter] postNotification:notification]; \
+}\
+
+
 @interface CDINotificationInjectorObject : NSObject
 
 @property (nonatomic,copy) NSString *selectorName;
