@@ -11,20 +11,25 @@
 // This prefix is used to identify the injectable instance variable
 #define __NOTIFICATION_INJECT_PREFIX @"__notification_inject__"
 
-#define NotificationInject(className,selector, notification) interface className (NotificationInjection_ ## selector ## notification)\
-@end\
-@implementation className (NotificationInjection_ ## selector ## notification)\
--(CDINotificationInjectorObject *)__notification_inject__ ## instanceVariableName {\
-CDINotificationInjectorObject *object = [CDINotificationInjectorObject new];\
-object.selectorName = selector;\
-object.nnotificationName = name;\
-return object; \
+#warning NotificationInject is broken(fix later)
+
+//#define NotificationInject(className,selector, notification) implementation className ()\
+//-(CDINotificationInjectorObject *)__notification_inject__ ## notification {\
+//    CDINotificationInjectorObject *object = [CDINotificationInjectorObject new];\
+//    object.selectorName = @selector( selector );\
+//    object.notificationName = notification;\
+//    return object; \
+//}\
+//@end\
+
+#define SubscribeNotification(selector,n,obj)autoreleasepool{\
+    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];\
+    [defaultCenter addObserver:self selector:selector name:n object:obj];\
 }\
-@end\
 
 #define SendNotification(n,obj) autoreleasepool{\
-NSNotification *notification = [NSNotification notificationWithName:n object:obj];\
-[[NSNotificationCenter defaultCenter] postNotification:notification]; \
+    NSNotification *notification = [NSNotification notificationWithName:n object:obj];\
+    [[NSNotificationCenter defaultCenter] postNotification:notification]; \
 }\
 
 
